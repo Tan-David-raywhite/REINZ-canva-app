@@ -1,0 +1,36 @@
+import type { ObjectDeserializer, StringEnumDeserializer } from './types';
+type Optional<T> = T | undefined;
+export declare class Deserialization {
+    static checkObject(val: any): object;
+    static requiredNumber(name: string, serializedData: object): number;
+    static repeatedNumber(name: string, serializedData: object): Optional<readonly number[]>;
+    static optionalNumber(name: string, serializedData: object): Optional<number>;
+    static requiredString(name: string, serializedData: object): string;
+    static optionalString(name: string, serializedData: object): Optional<string>;
+    static repeatedString(name: string, serializedData: object): Optional<readonly string[]>;
+    static requiredBoolean(name: string, serializedData: object): boolean;
+    static optionalBoolean(name: string, serializedData: object): Optional<boolean>;
+    static repeatedBoolean(name: string, serializedData: object): Optional<readonly boolean[]>;
+    static requiredObject<T>(deserialize: ObjectDeserializer<T>, name: string, serializedData: object): T;
+    static optionalObject<T>(deserialize: ObjectDeserializer<T>, name: string, serializedData: object): Optional<T>;
+    static repeatedObject<T>(deserialize: ObjectDeserializer<T>, name: string, serializedData: object): Optional<readonly T[]>;
+    static requiredStringEnum<T>(deserialize: StringEnumDeserializer<T>, name: string, serializedData: object): T;
+    static optionalStringEnum<T>(deserialize: StringEnumDeserializer<T>, name: string, serializedData: object): Optional<T>;
+    static repeatedStringEnum<T>(deserialize: StringEnumDeserializer<T>, name: string, serializedData: object): Optional<readonly T[]>;
+    static numberObjectMap<T>(deserialize: ObjectDeserializer<T>, name: string, serializedData: object): Optional<Map<number, T>>;
+    static stringNumberMap(name: string, serializedData: object): Optional<Map<string, number>>;
+    static stringObjectMap<T>(deserialize: ObjectDeserializer<T>, name: string, serializedData: object): Optional<Map<string, T>>;
+    static stringEnumMap<T>(deserialize: StringEnumDeserializer<T>, name: string, serializedData: object): Optional<Map<string, T>>;
+    static stringStringMap(name: string, serializedData: object): Optional<Map<string, string>>;
+    static numberNumberMap(name: string, serializedData: object): Optional<Map<number, number>>;
+    static numberStringMap(name: string, serializedData: object): Optional<Map<number, string>>;
+    private static map;
+    private static numberMapKey;
+    private static stringMapKey;
+    private static numberMapValue;
+    private static objectMapValue;
+    private static stringMapValue;
+    private static enumMapValue;
+    private static isObject;
+}
+export {};

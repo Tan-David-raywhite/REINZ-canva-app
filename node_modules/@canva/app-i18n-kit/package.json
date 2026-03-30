@@ -1,0 +1,40 @@
+{
+  "name": "@canva/app-i18n-kit",
+  "version": "1.2.0",
+  "author": "Canva Pty Ltd.",
+  "description": "Internationalization kit for Canva apps. Adapts `react-intl` and `@formatjs/intl` to work with the Canva Apps SDK localization process",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "peerDependencies": {
+    "@formatjs/intl": ">=2.10.4 <=3.1.6",
+    "intl-messageformat": ">=10.5.14 <=10.7.16",
+    "react": "18 || 19",
+    "react-dom": "18 || 19",
+    "react-intl": ">=6.6.8 <=7.1.11"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "react-intl": {
+      "optional": true
+    }
+  },
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      },
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./lib/esm/index.js"
+      }
+    }
+  },
+  "typings": "./types/index.d.ts"
+}

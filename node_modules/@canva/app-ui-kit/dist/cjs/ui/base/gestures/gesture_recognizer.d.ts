@@ -1,0 +1,32 @@
+import type { GestureHandle } from '../handle/handle';
+import type { GestureElement, Recognizer } from './recognizer';
+export type { Direction, PanEvent } from './pan_recognizer';
+export { PanRecognizer } from './pan_recognizer';
+export type { PinchEvent } from './pinch_recognizer';
+export { PinchRecognizer } from './pinch_recognizer';
+export type { PressEvent } from './press_recognizer';
+export { PressRecognizer } from './press_recognizer';
+export type { GestureEvent, PointerType, Recognizer } from './recognizer';
+export type { TapEvent } from './tap_recognizer';
+export { TapRecognizer } from './tap_recognizer';
+export declare const longPressTime = 750;
+export declare class GestureRecognizer {
+    private readonly raf?;
+    private readonly caf?;
+    private element;
+    private readonly recognizers;
+    private readonly allPointers;
+    private readonly currentBatchPointerIds;
+    private moveFrame;
+    private actions;
+    private tracker;
+    readonly setRef?: (elementOrHandle: GestureElement | GestureHandle | null) => void;
+    constructor(recognizers: readonly Recognizer[], raf?: Window['requestAnimationFrame'] | undefined, caf?: Window['cancelAnimationFrame'] | undefined);
+    private readonly _setRef;
+    private onPointerDown;
+    private readonly onPointerMove;
+    private readonly onPointerUp;
+    private readonly onPointerCancel;
+    private onPointerEnd;
+    private processMoved;
+}

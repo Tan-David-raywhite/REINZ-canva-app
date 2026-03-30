@@ -1,0 +1,74 @@
+export function shallowEqual(objA, objB) {
+    if (is(objA, objB))
+        return true;
+    if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) return false;
+    const keysA = Object.keys(objA);
+    const keysB = Object.keys(objB);
+    if (keysA.length !== keysB.length) return false;
+    for(let i = 0; i < keysA.length; i++){
+        if (!Object.hasOwnProperty.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) return false;
+    }
+    return true;
+}
+function is(x, y) {
+    if (x === y)
+        return x !== 0 || 1 / x === 1 / y;
+    else
+        return x !== x && y !== y;
+}
+const mobxMixins = Symbol('patchMixins');
+const mobxPatchedDefinition = Symbol('patchedDefinition');
+function getMixins(target, methodName) {
+    const mixins = target[mobxMixins] = target[mobxMixins] || {};
+    const methodMixins = mixins[methodName] = mixins[methodName] || {};
+    methodMixins.locks = methodMixins.locks || 0;
+    methodMixins.methods = methodMixins.methods || [];
+    return methodMixins;
+}
+function wrapper(realMethod, mixins, ...args) {
+    mixins.locks++;
+    try {
+        let retVal;
+        if (realMethod !== undefined && realMethod !== null) retVal = realMethod.apply(this, args);
+        return retVal;
+    } finally{
+        mixins.locks--;
+        if (mixins.locks === 0) mixins.methods.forEach((mx)=>{
+            mx.apply(this, args);
+        });
+    }
+}
+function wrapFunction(realMethod, mixins) {
+    const fn = function(...args) {
+        wrapper.call(this, realMethod, mixins, ...args);
+    };
+    return fn;
+}
+export function patch(target, methodName, mixinMethod) {
+    const mixins = getMixins(target, methodName);
+    if (mixins.methods.indexOf(mixinMethod) < 0) mixins.methods.push(mixinMethod);
+    const oldDefinition = Object.getOwnPropertyDescriptor(target, methodName);
+    if (oldDefinition && oldDefinition[mobxPatchedDefinition])
+        return;
+    const originalMethod = target[methodName];
+    const newDefinition = createDefinition(target, methodName, oldDefinition ? oldDefinition.enumerable : undefined, mixins, originalMethod);
+    Object.defineProperty(target, methodName, newDefinition);
+}
+function createDefinition(target, methodName, enumerable, mixins, originalMethod) {
+    let wrappedFunc = wrapFunction(originalMethod, mixins);
+    return {
+        [mobxPatchedDefinition]: true,
+        get () {
+            return wrappedFunc;
+        },
+        set (value) {
+            if (this === target) wrappedFunc = wrapFunction(value, mixins);
+            else {
+                const newDefinition = createDefinition(this, methodName, enumerable, mixins, value);
+                Object.defineProperty(this, methodName, newDefinition);
+            }
+        },
+        configurable: true,
+        enumerable
+    };
+}

@@ -1,0 +1,12 @@
+export type { AvatarShape } from './private/internal_avatar';
+export type { AvatarProps, AvatarTooltipTriggerProps } from './private/avatar';
+export type { AvatarColorMap } from './private/internal_avatar';
+export { Avatar } from './private/avatar';
+export type { AvatarSize, FixedAvatarSize, VariableAvatarSize } from './private/avatar_size';
+export { useAvatarSize, useAvatarSizeInPixel } from './private/avatar_size';
+export { OverflowAvatar, OverflowCountUnknown } from './private/avatar_group_utils';
+export type { AvatarGroupItem, AvatarGroupProps } from './private/avatar_group';
+export { AvatarGroup } from './private/avatar_group';
+export type { AvatarPlaceholderProps } from './private/placeholders';
+export { AvatarPlaceholder } from './private/placeholders';
+export { DEFAULT_BACKGROUND_COLOR, generateAvatarBackgroundColor, useNearestAvatarUrlFromBundle, useNearestAvatarUrlFromImages, } from './private/utils';

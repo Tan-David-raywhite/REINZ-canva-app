@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.customProperties = void 0;
+exports.getStyle = getStyle;
+function Struct() { }
+function Dict() { }
+const styles = { handleSwatchDiameter: "10px", themeDark: ":global(.dark)", themeLight: ":global(.light)", colorUiBorder: "var(--enMi_w)", colorUiBorderFocused: "var(--4DkvNQ)", elevationSurfaceRaisedBg: "var(--LIE6Cw)", baseUnit: "8px", colorBlackA02: "#39466024", colorWhiteA05: "#FFFFFF66", radiusElementRound: "var(--aiHVUg)", checkerColor: "var(--ca2hZw)", alphaSliderHeight: "16px", checkeredSize: "4px", overlayColor: "var(--XbHktw)", container: "DdFdrw", hideOutline: "AK7pAQ", widener: "_lXM1Q", overlay: "_5Il6lw", track: "_6xYY_Q", handle: "P9jfkQ" };
+exports.default = styles;
+exports.customProperties = { colorUiBorder: "--enMi_w", colorUiBorderFocused: "--4DkvNQ", elevationSurfaceRaisedBg: "--LIE6Cw", radiusElementRound: "--aiHVUg", checkerColor: "--ca2hZw", overlayColor: "--XbHktw" };
+const dictStyles = { "handleSwatchDiameter": "10px", "themeDark": ":global(.dark)", "themeLight": ":global(.light)", "colorUiBorder": "var(--enMi_w)", "colorUiBorderFocused": "var(--4DkvNQ)", "elevationSurfaceRaisedBg": "var(--LIE6Cw)", "baseUnit": "8px", "colorBlackA02": "#39466024", "colorWhiteA05": "#FFFFFF66", "radiusElementRound": "var(--aiHVUg)", "checkerColor": "var(--ca2hZw)", "alphaSliderHeight": "16px", "checkeredSize": "4px", "overlayColor": "var(--XbHktw)", "container": "DdFdrw", "hideOutline": "AK7pAQ", "widener": "_lXM1Q", "overlay": "_5Il6lw", "track": "_6xYY_Q", "handle": "P9jfkQ" };
+function getStyle(style) {
+    return dictStyles[style];
+}
+;

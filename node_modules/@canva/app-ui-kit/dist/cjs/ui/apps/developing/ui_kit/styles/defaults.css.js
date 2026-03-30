@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.customProperties = void 0;
+exports.getStyle = getStyle;
+function Struct() { }
+function Dict() { }
+const styles = { themed: ":global(.theme)", colorContentFg: "var(--VcZbvQ)", fontWeight400: "400", fontWeight600: "600", fontWeight700: "700", typographyBodyMediumFontSize: "var(--ZOMbtg)", typographyBodyMediumLineHeight: "var(--X8ysKw)", typographyTitleLargeFontSize: "var(--A3YTsg)", typographyTitleLargeLineHeight: "var(--KMUE6w)", typographyTitleMediumFontSize: "var(--Dynksw)", typographyTitleMediumLineHeight: "var(--moczTQ)", typographyTitleSmallFontSize: "var(--VrAiwg)", typographyTitleSmallLineHeight: "var(--VbcScA)", typographyTitleXLargeFontSize: "var(--Vf8OSg)", typographyTitleXLargeLineHeight: "var(--a60EZw)", typographyTitleXSmallFontSize: "var(--5QGiVg)", typographyTitleXSmallLineHeight: "var(--0LLpdQ)", typographyTitleXxSmallFontSize: "var(--R07nfg)", typographyTitleXxSmallLineHeight: "var(---eZrnA)", defaultFontStack: "\"Canva Sans\", \"Noto Sans Variable\", \"Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif" };
+exports.default = styles;
+exports.customProperties = { colorContentFg: "--VcZbvQ", typographyBodyMediumFontSize: "--ZOMbtg", typographyBodyMediumLineHeight: "--X8ysKw", typographyTitleLargeFontSize: "--A3YTsg", typographyTitleLargeLineHeight: "--KMUE6w", typographyTitleMediumFontSize: "--Dynksw", typographyTitleMediumLineHeight: "--moczTQ", typographyTitleSmallFontSize: "--VrAiwg", typographyTitleSmallLineHeight: "--VbcScA", typographyTitleXLargeFontSize: "--Vf8OSg", typographyTitleXLargeLineHeight: "--a60EZw", typographyTitleXSmallFontSize: "--5QGiVg", typographyTitleXSmallLineHeight: "--0LLpdQ", typographyTitleXxSmallFontSize: "--R07nfg", typographyTitleXxSmallLineHeight: "---eZrnA" };
+const dictStyles = { "themed": ":global(.theme)", "colorContentFg": "var(--VcZbvQ)", "fontWeight400": "400", "fontWeight600": "600", "fontWeight700": "700", "typographyBodyMediumFontSize": "var(--ZOMbtg)", "typographyBodyMediumLineHeight": "var(--X8ysKw)", "typographyTitleLargeFontSize": "var(--A3YTsg)", "typographyTitleLargeLineHeight": "var(--KMUE6w)", "typographyTitleMediumFontSize": "var(--Dynksw)", "typographyTitleMediumLineHeight": "var(--moczTQ)", "typographyTitleSmallFontSize": "var(--VrAiwg)", "typographyTitleSmallLineHeight": "var(--VbcScA)", "typographyTitleXLargeFontSize": "var(--Vf8OSg)", "typographyTitleXLargeLineHeight": "var(--a60EZw)", "typographyTitleXSmallFontSize": "var(--5QGiVg)", "typographyTitleXSmallLineHeight": "var(--0LLpdQ)", "typographyTitleXxSmallFontSize": "var(--R07nfg)", "typographyTitleXxSmallLineHeight": "var(---eZrnA)", "defaultFontStack": "\"Canva Sans\", \"Noto Sans Variable\", \"Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif" };
+function getStyle(style) {
+    return dictStyles[style];
+}
+;

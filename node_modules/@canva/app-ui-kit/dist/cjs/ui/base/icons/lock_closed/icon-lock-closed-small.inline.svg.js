@@ -1,0 +1,3 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><defs><path id=\"_2134433388__a\" d=\"M11.75 7.5a.25.25 0 0 0-.25-.25h-7a.25.25 0 0 0-.25.25v5c0 .14.11.25.25.25h7c.14 0 .25-.11.25-.25v-5zm1.25 0v5c0 .83-.67 1.5-1.5 1.5h-7A1.5 1.5 0 0 1 3 12.5v-5C3 6.67 3.67 6 4.5 6h7c.83 0 1.5.67 1.5 1.5zM8.5 9.87v1.7a.5.5 0 0 1-1 0v-1.7a1 1 0 1 1 1 0zM12 6.09a1.5 1.5 0 0 0-.5-.09h-.75v-.25c0-1.66-1.23-3-2.75-3s-2.75 1.34-2.75 3V6H4.5c-.18 0-.34.03-.5.09V5.5a4 4 0 1 1 8 0v.59z\"/></defs><use fill=\"currentColor\" fill-rule=\"nonzero\" xlink:href=\"#_2134433388__a\"/></svg>";

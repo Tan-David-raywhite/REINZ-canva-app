@@ -1,0 +1,3 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2ZM4.5 5a.5.5 0 0 1 .5-.5h6.25v6.75H4.5V5Zm6.75 7.75H4.5V19a.5.5 0 0 0 .5.5h6.25v-6.75Zm1.5 6.75v-6.75h6.75V19a.5.5 0 0 1-.5.5h-6.25Zm0-8.25V4.5H19a.5.5 0 0 1 .5.5v6.25h-6.75Z\" fill=\"currentColor\"/></svg>";

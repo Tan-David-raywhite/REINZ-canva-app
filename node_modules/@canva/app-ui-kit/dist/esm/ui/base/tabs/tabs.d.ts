@@ -1,0 +1,12 @@
+export { Tabs, TabsProvider } from './private/tabs';
+export type { TabsProps } from './private/tabs';
+export { Tab } from './private/tab';
+export type { TabProps } from './private/tab';
+export { TabList } from './private/tab_list';
+export type { TabListProps } from './private/tab_list';
+export { TabPanel } from './private/tab_panel';
+export type { TabPanelProps } from './private/tab_panel';
+export { TabPanels } from './private/tab_panels';
+export type { TabPanelsProps } from './private/tab_panels';
+export { useTab, useTabList, useTabPanel, TabsContext, useTabs, TabsElementsProvider, useTabsContext, useRegisterTabsElements, useTabsElements, } from './private/behavior';
+export type { UseTabOptions, UseTabPanelOptions, UseTabsResult, UseTabsOptions, TabsElementsContextType, } from './private/behavior';

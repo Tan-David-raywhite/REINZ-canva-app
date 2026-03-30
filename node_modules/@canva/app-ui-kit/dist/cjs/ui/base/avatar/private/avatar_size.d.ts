@@ -1,0 +1,10 @@
+import type * as React from 'react';
+export declare const fixedAvatarSizes: readonly ["xxsmall", "xsmall", "small", "medium", "large", "xlarge", "xxlarge", "xxxlarge"];
+export type FixedAvatarSize = (typeof fixedAvatarSizes)[number];
+export type VariableAvatarSize = `${number}rem`;
+export type AvatarSize = FixedAvatarSize | VariableAvatarSize;
+export declare const isVariableSize: (size: AvatarSize) => size is VariableAvatarSize;
+export declare const fixedAvatarSizeBaseUnitMultipliers: Record<FixedAvatarSize, number>;
+export declare const useAvatarSize: (size: AvatarSize) => VariableAvatarSize;
+export declare const useAvatarSizeInPixel: (size: AvatarSize, rootFontSize?: number) => number;
+export declare const useAvatarSizeStyle: (size: AvatarSize) => React.CSSProperties;

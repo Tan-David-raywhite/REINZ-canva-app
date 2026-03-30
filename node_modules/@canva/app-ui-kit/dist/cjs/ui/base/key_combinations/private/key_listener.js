@@ -1,0 +1,95 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: Object.getOwnPropertyDescriptor(all, name).get
+    });
+}
+_export(exports, {
+    get KeyListener () {
+        return KeyListener;
+    },
+    get addListenerOnBody () {
+        return addListenerOnBody;
+    }
+});
+const _preconditions = require('../../../../base/preconditions');
+const _input = require('../../dom/input/input');
+const _key_map = require("./key_map");
+const eventKinds = [
+    'keydown',
+    'keyup',
+    'keypress'
+];
+class KeyListener {
+    static getEnglishKey(event) {
+        const eventKey = event.key != null && _key_map.KeyMap.englishKeys.has(event.key) ? event.key.toLowerCase() : _key_map.KeyMap.codeToKey[event.code];
+        if (eventKey == null)
+            return event.key;
+        if (event.shiftKey && !event.code.startsWith('Numpad') && eventKey >= 'a' && eventKey <= 'z') return _key_map.KeyMap.shiftMap[eventKey] ? _key_map.KeyMap.shiftMap[eventKey] : eventKey;
+        return eventKey;
+    }
+    static isKeyMatch(event, trigger) {
+        const eventKey = trigger.ignoreKeyboardLayout === false ? event.key : KeyListener.getEnglishKey(event);
+        const isModifiersOtherThanShiftMatch = (event.altKey === !!trigger.altKey || eventKey === 'Alt') && (event.ctrlKey === !!trigger.ctrlKey || eventKey === 'Control') && (event.metaKey === !!trigger.metaKey || eventKey === 'Meta');
+        if (!isModifiersOtherThanShiftMatch) return false;
+        const specialChars = new Set([
+            '*',
+            '+'
+        ]);
+        const charsToIgnoreShift = new Set([
+            'Shift',
+            '/'
+        ]);
+        if (eventKey === trigger.key) {
+            if (_key_map.KeyMap.reverseShiftMap[trigger.key] != null)
+            return specialChars.has(trigger.key) ? event.shiftKey === !!trigger.shiftKey : true;
+            return event.shiftKey === !!trigger.shiftKey || charsToIgnoreShift.has(eventKey);
+        } else if (_key_map.KeyMap.shiftMap[trigger.key] != null && trigger.shiftKey) return specialChars.has(_key_map.KeyMap.shiftMap[trigger.key]) ?
+        false :
+        eventKey === _key_map.KeyMap.shiftMap[trigger.key];
+        return false;
+    }
+    addListener(kind, trigger, callback) {
+        const triggerClone = {
+            ...trigger
+        };
+        const handler = (ev)=>{
+            if (KeyListener.isKeyMatch(ev, triggerClone) && !this.shouldIgnoreEvent(ev)) callback(ev);
+        };
+        this.element.addEventListener(kind, handler);
+        this.events[kind].push(handler);
+    }
+    shouldIgnoreEvent(ev) {
+        const eventTarget = _preconditions.Preconditions.checkExists(ev.target, 'event target must exist');
+        const ownerDocument = _preconditions.Preconditions.checkExists(eventTarget.ownerDocument, 'event target must be node and ownerDocument must exist');
+        if (ev.keyCode === 229)
+            return true;
+        return this.opt.ignoreInput && (0, _input.isElementInput)(eventTarget, ownerDocument.defaultView);
+    }
+    reset() {
+        for (const eventType of eventKinds){
+            this.events[eventType].forEach((handler)=>this.element.removeEventListener(eventType, handler));
+            this.events[eventType] = [];
+        }
+    }
+    constructor(element, opt){
+        this.element = element;
+        this.opt = opt;
+        this.events = {
+            ['keydown']: [],
+            ['keyup']: [],
+            ['keypress']: []
+        };
+    }
+}
+let keyListenerOnBody;
+function addListenerOnBody(kind, trigger, callback) {
+    if (keyListenerOnBody == null) keyListenerOnBody = new KeyListener(document.body, {
+        ignoreInput: true
+    });
+    keyListenerOnBody.addListener(kind, trigger, callback);
+}

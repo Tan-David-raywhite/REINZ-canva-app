@@ -1,0 +1,10 @@
+import type { PredicateFn, ValidationFn, ValidationResult, Validator } from './validation';
+export declare function not<T, E = undefined>(fn: PredicateFn<T> | ValidationFn<T>, error?: E): ValidationFn<T, E>;
+export declare function not<T, E = undefined>(fn: ValidationFn<T, E>, error?: E): ValidationFn<T, E>;
+export declare const isDefined: <T>(value: T | undefined) => ValidationResult<undefined>;
+export declare function equals<E = undefined>(expectedValue: () => string, error?: E): ValidationFn<string, E>;
+export declare function equals<E = undefined>(expectedValue: number, error?: E): ValidationFn<number, E>;
+export declare function equals<E = undefined>(expectedValue: string, error?: E): ValidationFn<string, E>;
+export declare function ignoreUndefined<T, E = undefined>(validator: PredicateFn<T> | ValidationFn<T>, error?: E): ValidationFn<T | undefined, E>;
+export declare function ignoreUndefined<T, E = undefined>(validator: Validator<T, E>): ValidationFn<T | undefined, E>;
+export declare function assertDefined<T, E = undefined>(validator: PredicateFn<T> | Validator<T, E>, error?: E): ValidationFn<T | undefined, E>;

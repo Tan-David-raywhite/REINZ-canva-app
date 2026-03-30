@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { avatarSize: "var(--k9SmeA)", colorActionSecondaryFg: "var(--oAdupw)", colorUiNeutralBg: "var(--xwa5zw)", elevationSurfaceBg: "var(--Ypt7xQ)", radiusElementRound: "var(--aiHVUg)", standardAvatarOverlap: "calc((var(--k9SmeA) + 10px)*-0.2)", overflowAvatarBorderSize: "2px", avatarGroup: "CnLinw", avatarGroupItem: "T054bg", overflowAvatarThreeChars: "D80L9Q", overflowAvatarFourChars: "sS_odA", overflowAvatarFiveChars: "e4zJeA", overflowAvatarSmall: "LqHxSA", overflowAvatarContainer: "C_fzdw", overflowAvatar: "bzAr0A", overflowAvatarAboveLarge: "BECFFg", hoverSupported: "lzCQhQ" };
+export default styles;
+export const customProperties = { avatarSize: "--k9SmeA", colorActionSecondaryFg: "--oAdupw", colorUiNeutralBg: "--xwa5zw", elevationSurfaceBg: "--Ypt7xQ", radiusElementRound: "--aiHVUg" };
+const dictStyles = { "avatarSize": "var(--k9SmeA)", "colorActionSecondaryFg": "var(--oAdupw)", "colorUiNeutralBg": "var(--xwa5zw)", "elevationSurfaceBg": "var(--Ypt7xQ)", "radiusElementRound": "var(--aiHVUg)", "standardAvatarOverlap": "calc((var(--k9SmeA) + 10px)*-0.2)", "overflowAvatarBorderSize": "2px", "avatarGroup": "CnLinw", "avatarGroupItem": "T054bg", "overflowAvatarThreeChars": "D80L9Q", "overflowAvatarFourChars": "sS_odA", "overflowAvatarFiveChars": "e4zJeA", "overflowAvatarSmall": "LqHxSA", "overflowAvatarContainer": "C_fzdw", "overflowAvatar": "bzAr0A", "overflowAvatarAboveLarge": "BECFFg", "hoverSupported": "lzCQhQ" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

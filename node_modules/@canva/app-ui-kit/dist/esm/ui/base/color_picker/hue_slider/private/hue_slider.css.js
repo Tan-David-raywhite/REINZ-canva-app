@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { handleDiameter: "18px", handleSwatchDiameter: "10px", colorUiBorder: "var(--enMi_w)", colorUiBorderFocused: "var(--4DkvNQ)", baseUnit: "8px", radiusElementRound: "var(--aiHVUg)", hueSliderHeight: "16px", spaceAroundHandle: "-1px", container: "aV26Fw", hideOutline: "sjGdyw", widener: "_8a7YkA", track: "Lol78g", handle: "xt_H1Q" };
+export default styles;
+export const customProperties = { colorUiBorder: "--enMi_w", colorUiBorderFocused: "--4DkvNQ", radiusElementRound: "--aiHVUg" };
+const dictStyles = { "handleDiameter": "18px", "handleSwatchDiameter": "10px", "colorUiBorder": "var(--enMi_w)", "colorUiBorderFocused": "var(--4DkvNQ)", "baseUnit": "8px", "radiusElementRound": "var(--aiHVUg)", "hueSliderHeight": "16px", "spaceAroundHandle": "-1px", "container": "aV26Fw", "hideOutline": "sjGdyw", "widener": "_8a7YkA", "track": "Lol78g", "handle": "xt_H1Q" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

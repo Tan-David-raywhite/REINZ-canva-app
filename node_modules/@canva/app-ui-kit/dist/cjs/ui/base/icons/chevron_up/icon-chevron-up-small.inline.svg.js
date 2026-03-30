@@ -1,0 +1,3 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><path fill=\"currentColor\" d=\"m5.03 10.028 2.793-2.793a.25.25 0 0 1 .353 0l2.794 2.793a.75.75 0 0 0 1.06-1.06L9.237 6.173a1.75 1.75 0 0 0-2.475 0L3.97 8.967a.75.75 0 1 0 1.061 1.06\"/></svg>";
