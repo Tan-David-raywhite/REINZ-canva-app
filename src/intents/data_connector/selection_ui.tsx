@@ -33,7 +33,7 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
         if (request.invocationContext.dataSourceRef) {
           try {
             const savedParams = JSON.parse(
-              request.invocationContext.dataSourceRef.source,
+              request.invocationContext.dataSourceRef.source
             ) as RealEstateDataConfig;
             setListingIds(savedParams.listingIds || []);
           } catch {
@@ -44,14 +44,14 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
       case "outdated_source_ref":
         // The data source reference stored in Canva is no longer valid
         setError(
-          "Your previously selected data is no longer available. Please make a new selection.",
+          "Your previously selected data is no longer available. Please make a new selection."
         );
         break;
       case "app_error":
         // Display error message from previous data fetch attempt
         setError(
           request.invocationContext.message ||
-            "An error occurred with your data",
+            "An error occurred with your data"
         );
         break;
       default:
@@ -79,7 +79,7 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
         setError(
           result.status === "app_error" && "message" in result
             ? result.message || "An error occurred"
-            : `Error: ${result.status}`,
+            : `Error: ${result.status}`
         );
       }
     } catch {
@@ -89,30 +89,28 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
     }
   };
 
-  const getListings = async(keyword:string) => {
+  const getListings = async (keyword: string) => {
     const bodyData = {
-    "suggest": {
-                   "address": keyword
-                },
-    include:[
-      "id", "address"
-    ]
-  };
-
-  const response = await fetch(
-    "https://raywhiteapi.ep.dynamics.net/v1/listings?apiKey=df83a96e-0f55-4a20-82d9-eaa5f3e30335",
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
+      suggest: {
+        address: keyword,
       },
-      body: JSON.stringify(bodyData),
-    },
-  );
+      include: ["id", "address"],
+    };
 
-  const result = await response.json();
-  setSearchListings(result.data)
-  }
+    const response = await fetch(
+      "https://raywhiteapi.ep.dynamics.net/v1/listings?apiKey=df83a96e-0f55-4a20-82d9-eaa5f3e30335",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(bodyData),
+      }
+    );
+
+    const result = await response.json();
+    setSearchListings(result.data);
+  };
 
   return (
     <div className={styles.scrollContainer}>
@@ -124,37 +122,34 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
           <Alert tone="positive" title="Data preview loaded successfully!" />
         )}
         <Rows spacing="1u">
-          {
-            searchListings?
-          <FormField
-            label="Release Stage"
-            control={(props) => (
-              <CheckboxGroup
-                {...props}
-                value={listingIds}
-                options={searchListings.map((stage) => {
-                  return {
-                    label: stage.value.address.formatted,
-                    value: stage.value.id,
-                  };
-                })}
-                onChange={setListingIds}
-              />
-            )}
-          />
-          :
-          null
-          }
+          {searchListings ? (
+            <FormField
+              label="Release Stage"
+              control={(props) => (
+                <CheckboxGroup
+                  {...props}
+                  value={listingIds}
+                  options={searchListings.map((stage) => {
+                    return {
+                      label: stage.value.address.formatted,
+                      value: stage.value.id,
+                    };
+                  })}
+                  onChange={setListingIds}
+                />
+              )}
+            />
+          ) : null}
           <Button
             variant="primary"
             onClick={loadData}
             loading={loading}
             stretch
           >
-            Load datasss
+            Load data
           </Button>
         </Rows>
       </Rows>
     </div>
   );
-};  
+};
