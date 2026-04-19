@@ -8,8 +8,13 @@ import {
   Text,
   CheckboxGroup,
   FormField,
+  TabList,
+  Tab,
   Title,
   SearchInputMenu,
+  TabPanels,
+  TabPanel,
+  Tabs,
 } from "@canva/app-ui-kit";
 import { useEffect, useState } from "react";
 import * as styles from "styles/components.css";
@@ -116,12 +121,27 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
     <div className={styles.scrollContainer}>
       <Rows spacing="2u">
         <Title size="large">Listings api (Data Connector)</Title>
-        <SearchInputMenu onChangeComplete={(val) => getListings(val)} />
+        
+        {/* <Tabs> */}
+        <Rows spacing="1u">
+
+          {/* <TabList>
+            <Tab id="search">
+              Search listings
+            </Tab>
+            <Tab id="selected">
+              Selected listings
+            </Tab>
+          </TabList> */}
+        </Rows>
+        {/* <TabPanels>
+          <TabPanel id="search"> */}
+        <Rows spacing="1u">
+          <SearchInputMenu onChangeComplete={(val) => getListings(val)} />
         {error && <Alert tone="critical" title={error} />}
         {success && (
           <Alert tone="positive" title="Data preview loaded successfully!" />
         )}
-        <Rows spacing="1u">
           {searchListings ? (
             <FormField
               label="Release Stage"
@@ -145,11 +165,61 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
             onClick={loadData}
             loading={loading}
             stretch
-          >
+            disabled={listingIds ? false: true}
+          > 
             Load data
           </Button>
         </Rows>
+        {/* </TabPanel> */}
+          {/* <TabPanel id="selected">
+        <Rows spacing="1u">
+          {
+            listingIds ? (
+              listingIds.map((item, index) => {
+                return(
+                  <>
+                  {item}
+                  </>
+                )
+              })
+            )
+            : 
+            null
+          }
+          {searchListings ? (
+            <FormField
+              label="Release Stage"
+              control={(props) => (
+                <CheckboxGroup
+                  {...props}
+                  value={listingIds}
+                  options={searchListings.map((stage) => {
+                    return {
+                      label: stage.value.address.formatted,
+                      value: stage.value.id,
+                    };
+                  })}
+                  onChange={setListingIds}
+                />
+              )}
+            />
+          ) : null}
+          <Button
+            variant="primary"
+            onClick={loadData}
+            loading={loading}
+            stretch
+            disabled={listingIds ? false: true}
+          > 
+            Load data
+          </Button>
+        </Rows>
+        </TabPanel> */}
+
+        {/* </TabPanels>
+        </Tabs> */}
       </Rows>
+      
     </div>
   );
 };

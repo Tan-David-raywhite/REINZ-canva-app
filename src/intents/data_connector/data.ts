@@ -77,7 +77,7 @@ const getListings = async (selectedlistingIds) => {
   );
 
   const result = await response.json();
-  return result.data; // ✅ return actual data
+  return result.data;
 };
 
 const getProjects = () => [
@@ -135,6 +135,7 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
   // Define column structure based on user's selected stages
   const columnConfigs = [
     { name: "Image", type: "media" as const },
+    { name: "Other image", type: "media" as const },
     { name: "Address", type: "string" as const },
     { name: "Title", type: "string" as const },
     { name: "Description", type: "string" as const },
@@ -147,23 +148,28 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
     { name: "Post Code", type: "string" as const },
     { name: "Bathrooms", type: "number" as const },
     { name: "Bedrooms", type: "number" as const },
-    { name: "Car Spaces", type: "number" as const },
+    { name: "Parking Spaces", type: "number" as const }, // Car Spaces
     { name: "Car ports", type: "number" as const },
     { name: "Garages", type: "number" as const },
     { name: "Dining Rooms", type: "number" as const },
     { name: "Open Spaces", type: "number" as const },
     { name: "Listing Type", type: "string" as const },
+    { name: "Listing status", type: "string" as const },
     { name: "Building Area", type: "number" as const },
-    { name: "Land Area", type: "number" as const },
+    { name: "Lot Size", type: "number" as const }, // Land area
     { name: "Listing price", type: "string" as const },
-    { name: "Agent Photo", type: "media" as const },
+    { name: "Property Website", type: "string" as const },
+    { name: "Auction date", type: "string" as const },
+    { name: "Auction location", type: "string" as const },
     { name: "Agent Name", type: "string" as const },
     { name: "Agent Email", type: "string" as const },
     { name: "Agent Contact", type: "string" as const },
-    { name: "Agent Photo 2", type: "media" as const },
     { name: "Agent Name 2", type: "string" as const },
     { name: "Agent Email 2", type: "string" as const },
     { name: "Agent Contact 2", type: "string" as const },
+    { name: "Agent Name 3", type: "string" as const },
+    { name: "Agent Email 3", type: "string" as const },
+    { name: "Agent Contact 3", type: "string" as const },
 
     // { name: "Bedrooms", type: "number" as const }
     // ,
@@ -186,24 +192,29 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
       (m) => m.code === "LAS"
     )?.value;
 
+    const propertyWebsite = project.value.links?.find(
+      (m) => m.code === "PRL"
+    )
+    console.log(propertyWebsite)
+
     const agents = project.value.agents || [];
-    const [agent1, agent2] = agents;
+    const [agent1, agent2, agent3] = agents;
 
     // 3️⃣ Build a lookup map: agentId → agent info (including photo)
-    const agentMap = new Map(agentData.data.map((a) => [a.value.id, a]));
+    // const agentMap = new Map(agentData.data.map((a) => [a.value.id, a]));
 
-    const agent1Info = agent1 ? agentMap.get(agent1.memberId) : null;
-    const agent2Info = agent2 ? agentMap.get(agent2.memberId) : null;
+    // const agent1Info = agent1 ? agentMap.get(agent1.memberId) : null;
+    // const agent2Info = agent2 ? agentMap.get(agent2.memberId) : null;
 
-    console.log(agentData);
+    // console.log(agentData);
 
 
-    const agent1photo =
-      agent1Info.value.profile.photos?.find((m) => m.typeCode === "MPHS")
-        ?.fileName ?? null;
-    const agent2photo =
-      agent2Info.value.profile.photos?.find((m) => m.typeCode === "MPHS")
-        ?.fileName ?? null;
+    // const agent1photo =
+    //   agent1Info.value.profile.photos?.find((m) => m.typeCode === "MPHS")
+    //     ?.fileName ?? null;
+    // const agent2photo =
+    //   agent2Info.value.profile.photos?.find((m) => m.typeCode === "MPHS")
+    //     ?.fileName ?? null;
 
     return {
       cells: [
@@ -221,9 +232,23 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
             },
           ],
         },
-        { type: "string" as const, value: project.value.address.formatted },
+        {
+          type: "media" as const,
+          value: [
+            {
+              type: "image_upload",
+              url: project.value.images[1].url,
+              thumbnailUrl: project.value.images[1].url,
+              width: 800,
+              height: 800,
+              mimeType: "image/jpeg",
+              aiDisclosure: "none",
+            },
+          ],
+        },
+        { type: "string" as const, value: project.value.address.unitNumber ? project.value.address.unitNumber : '' + ' ' + project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType + ' ' + project.value.address.suburb + ' ' + project.value.address.postCode },
         { type: "string" as const, value: project.value.title },
-        { type: "string" as const, value: project.value.Description },
+        { type: "string" as const, value: project.value.description },
 
         { type: "string" as const, value: project.value.address.unitNumber },
         { type: "string" as const, value: project.value.address.streetNumber },
@@ -242,47 +267,57 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
         { type: "number" as const, value: project.value.openSpaces },
 
         { type: "string" as const, value: project.value.statusCode },
+        
+        { type: "string" as const, value: project.value.auction ? "Auction" : project.value.subTypeCode },
+
 
         { type: "number" as const, value: buildingArea ?? "" },
         { type: "number" as const, value: landArea ?? "" },
 
         { type: "string" as const, value: project.value.price },
+        { type: "string" as const, value: propertyWebsite.url ?? "" },
+        { type: "string" as const, value: project.value.auction ? project.value.auction.date : ""},
+        { type: "string" as const, value: project.value.auction ? project.value.auction.location : ""},
 
-        {
-          type: "media" as const,
-          value: agent1photo ? [
-            {
-              type: "image_upload",
-              url: agent1photo,
-              thumbnailUrl: agent1photo,
-              width: 800,
-              height: 800,
-              mimeType: "image/jpeg",
-              aiDisclosure: "none",
-            },
-          ] : [],
-        },
+        // {
+        //   type: "media" as const,
+        //   value: agent1photo ? [
+        //     {
+        //       type: "image_upload",
+        //       url: agent1photo,
+        //       thumbnailUrl: agent1photo,
+        //       width: 800,
+        //       height: 800,
+        //       mimeType: "image/jpeg",
+        //       aiDisclosure: "none",
+        //     },
+        //   ] : [],
+        // },
         { type: "string" as const, value: agent1?.fullName ?? "" },
         { type: "string" as const, value: agent1?.email ?? "" },
         { type: "string" as const, value: agent1?.mobilePhone ?? "" },
 
-        {
-          type: "media" as const,
-          value: agent2photo ? [
-            {
-              type: "image_upload",
-              url: agent2photo,
-              thumbnailUrl: agent2photo,
-              width: 800,
-              height: 800,
-              mimeType: "image/jpeg",
-              aiDisclosure: "none",
-            },
-          ] : [],
-        },
+        // {
+        //   type: "media" as const,
+        //   value: agent2photo ? [
+        //     {
+        //       type: "image_upload",
+        //       url: agent2photo,
+        //       thumbnailUrl: agent2photo,
+        //       width: 800,
+        //       height: 800,
+        //       mimeType: "image/jpeg",
+        //       aiDisclosure: "none",
+        //     },
+        //   ] : [],
+        // },
         { type: "string" as const, value: agent2?.fullName ?? "" },
         { type: "string" as const, value: agent2?.email ?? "" },
         { type: "string" as const, value: agent2?.mobilePhone ?? "" },
+        
+        { type: "string" as const, value: agent3?.fullName ?? "" },
+        { type: "string" as const, value: agent3?.email ?? "" },
+        { type: "string" as const, value: agent3?.mobilePhone ?? "" },
       ],
     };
   });
