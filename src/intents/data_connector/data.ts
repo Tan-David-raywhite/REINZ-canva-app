@@ -134,11 +134,17 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
 
   // Define column structure based on user's selected stages
   const columnConfigs = [
+    { name: "Listing id", type: "number" as const },
     { name: "Image", type: "media" as const },
     { name: "Other image", type: "media" as const },
+    { name: "Other image 2", type: "media" as const },
     { name: "Address", type: "string" as const },
+    { name: "Address 2", type: "string" as const },
+    { name: "Address 3", type: "string" as const },
+
     { name: "Title", type: "string" as const },
     { name: "Description", type: "string" as const },
+
     { name: "Unit Number", type: "string" as const },
     { name: "Street Number", type: "string" as const },
     { name: "Street name", type: "string" as const },
@@ -146,6 +152,7 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
     { name: "Suburb", type: "string" as const },
     { name: "State", type: "string" as const },
     { name: "Post Code", type: "string" as const },
+
     { name: "Bathrooms", type: "number" as const },
     { name: "Bedrooms", type: "number" as const },
     { name: "Parking Spaces", type: "number" as const }, // Car Spaces
@@ -153,12 +160,15 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
     { name: "Garages", type: "number" as const },
     { name: "Dining Rooms", type: "number" as const },
     { name: "Open Spaces", type: "number" as const },
+
     { name: "Listing Type", type: "string" as const },
     { name: "Listing status", type: "string" as const },
     { name: "Building Area", type: "number" as const },
     { name: "Lot Size", type: "number" as const }, // Land area
+    
     { name: "Listing price", type: "string" as const },
     { name: "Property Website", type: "string" as const },
+
     { name: "Auction date", type: "string" as const },
     { name: "Auction location", type: "string" as const },
     { name: "Agent Name", type: "string" as const },
@@ -170,20 +180,17 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
     { name: "Agent Name 3", type: "string" as const },
     { name: "Agent Email 3", type: "string" as const },
     { name: "Agent Contact 3", type: "string" as const },
+    { name: "Office name", type: "string" as const },
 
-    // { name: "Bedrooms", type: "number" as const }
-    // ,
-
-    // { name: "Bathrooms", type: "number" as const }
-    //   ,
-
-    // { name: "Car Spaces", type: "number" as const }
-    // ,
-    // { name: "Media", type: "media" as const },
   ];
 
   // Generate table rows with data cells matching the column structure
   const rows = projects.map((project) => {
+
+    const address2 = project.value.address.unitNumber ? project.value.address.unitNumber + ' ' + project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType
+    :
+    project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType
+
     const buildingArea = project.value.measurements?.find(
       (m) => m.code === "BAS"
     )?.value;
@@ -195,12 +202,22 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
     const propertyWebsite = project.value.links?.find(
       (m) => m.code === "PRL"
     )
-    console.log(propertyWebsite)
 
     const agents = project.value.agents || [];
     const [agent1, agent2, agent3] = agents;
 
-    // 3️⃣ Build a lookup map: agentId → agent info (including photo)
+    function formatNumber(contact: string){
+      if (!/^\d{10}$/.test(contact)) return contact;
+      return contact.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
+    }
+
+    
+    // if (project.value.auction.date != null){      
+    //  const auctionDate =  new Date(project.value.auction.date)
+    //  console.log(project.value.auction.date)
+// }
+    
+
     // const agentMap = new Map(agentData.data.map((a) => [a.value.id, a]));
 
     // const agent1Info = agent1 ? agentMap.get(agent1.memberId) : null;
@@ -218,6 +235,7 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
 
     return {
       cells: [
+         { type: "number" as const, value: project.value.id },
         {
           type: "media" as const,
           value: [
@@ -232,6 +250,7 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
             },
           ],
         },
+        project.value.images.length >= 2 ?
         {
           type: "media" as const,
           value: [
@@ -245,8 +264,30 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
               aiDisclosure: "none",
             },
           ],
-        },
-        { type: "string" as const, value: project.value.address.unitNumber ? project.value.address.unitNumber : '' + ' ' + project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType + ' ' + project.value.address.suburb + ' ' + project.value.address.postCode },
+        }
+        :
+        {},
+        project.value.images.length >= 3 ?
+        {
+          type: "media" as const,
+          value: [
+            {
+              type: "image_upload",
+              url: project.value.images[2].url,
+              thumbnailUrl: project.value.images[2].url,
+              width: 800,
+              height: 800,
+              mimeType: "image/jpeg",
+              aiDisclosure: "none",
+            },
+          ],
+        }
+        : 
+        {},
+        
+        { type: "string" as const, value: project.value.address.formatted },
+        { type: "string" as const, value: address2 },
+        { type: "string" as const, value: project.value.address.suburb + ', ' + project.value.address.postCode },
         { type: "string" as const, value: project.value.title },
         { type: "string" as const, value: project.value.description },
 
@@ -266,18 +307,18 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
         { type: "number" as const, value: project.value.diningRooms },
         { type: "number" as const, value: project.value.openSpaces },
 
-        { type: "string" as const, value: project.value.statusCode },
+        { type: "string" as const, value: project.value.status },
         
-        { type: "string" as const, value: project.value.auction ? "Auction" : project.value.subTypeCode },
-
+        { type: "string" as const, value: project.value.auction != null||undefined  ? "Auction" : project.value.subType ?? "" },
 
         { type: "number" as const, value: buildingArea ?? "" },
         { type: "number" as const, value: landArea ?? "" },
 
         { type: "string" as const, value: project.value.price },
         { type: "string" as const, value: propertyWebsite.url ?? "" },
-        { type: "string" as const, value: project.value.auction ? project.value.auction.date : ""},
-        { type: "string" as const, value: project.value.auction ? project.value.auction.location : ""},
+
+        { type: "string" as const, value: project.value.auction != null||undefined ? new Date(project.value.auction.date).toLocaleString("en-au"): ""},
+        { type: "string" as const, value: project.value.auction != null||undefined ? project.value.auction.location : ""},
 
         // {
         //   type: "media" as const,
@@ -293,9 +334,9 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
         //     },
         //   ] : [],
         // },
-        { type: "string" as const, value: agent1?.fullName ?? "" },
-        { type: "string" as const, value: agent1?.email ?? "" },
-        { type: "string" as const, value: agent1?.mobilePhone ?? "" },
+        { type: "string" as const, value: agent1.fullName},
+        { type: "string" as const, value: agent1.email},
+        { type: "string" as const, value: formatNumber(agent1.mobilePhone) },
 
         // {
         //   type: "media" as const,
@@ -311,13 +352,15 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
         //     },
         //   ] : [],
         // },
-        { type: "string" as const, value: agent2?.fullName ?? "" },
-        { type: "string" as const, value: agent2?.email ?? "" },
-        { type: "string" as const, value: agent2?.mobilePhone ?? "" },
+          { type: "string" as const, value: agent2?.fullName ?? "" },
+          { type: "string" as const, value: agent2?.email ?? "" },
+          { type: "string" as const, value: formatNumber(agent2?.mobilePhone) ?? "" },
         
         { type: "string" as const, value: agent3?.fullName ?? "" },
         { type: "string" as const, value: agent3?.email ?? "" },
-        { type: "string" as const, value: agent3?.mobilePhone ?? "" },
+        { type: "string" as const, value: formatNumber(agent3?.mobilePhone) ?? "" },
+
+        { type: "string" as const, value: project.value.office.businessName },
       ],
     };
   });
