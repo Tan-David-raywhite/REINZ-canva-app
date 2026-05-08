@@ -187,7 +187,7 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
   // Generate table rows with data cells matching the column structure
   const rows = projects.map((project) => {
 
-    const address2 = project.value.address.unitNumber ? project.value.address.unitNumber + ' ' + project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType
+    const address2 = project.value.address.unitNumber ? project.value.address.unitNumber + '/' + project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType
     :
     project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType
 
@@ -317,7 +317,12 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
         { type: "string" as const, value: project.value.price },
         { type: "string" as const, value: propertyWebsite.url ?? "" },
 
-        { type: "string" as const, value: project.value.auction != null||undefined ? new Date(project.value.auction.date).toLocaleString("en-au"): ""},
+        { type: "string" as const, value: project.value.auction != null||undefined ? new Date(project.value.auction.date).toLocaleDateString("en-AU", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        }): ""},
         { type: "string" as const, value: project.value.auction != null||undefined ? project.value.auction.location : ""},
 
         // {
