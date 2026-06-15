@@ -138,32 +138,32 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
     { name: "Image", type: "media" as const },
     { name: "Other image", type: "media" as const },
     { name: "Other image 2", type: "media" as const },
-    { name: "Address", type: "string" as const },
-    { name: "Address 2", type: "string" as const },
-    { name: "Address 3", type: "string" as const },
 
-    { name: "Title", type: "string" as const },
-    { name: "Description", type: "string" as const },
+      { name: "Address", type: "string" as const },
+      { name: "Address 2", type: "string" as const },
+      { name: "Address 3", type: "string" as const },
+      { name: "Title", type: "string" as const },
+      { name: "Description", type: "string" as const },
 
-    { name: "Unit Number", type: "string" as const },
-    { name: "Street Number", type: "string" as const },
-    { name: "Street name", type: "string" as const },
-    { name: "Street type", type: "string" as const },
-    { name: "Suburb", type: "string" as const },
-    { name: "State", type: "string" as const },
-    { name: "Post Code", type: "string" as const },
+      { name: "Unit Number", type: "string" as const },
+      { name: "Street Number", type: "string" as const },
+      { name: "Street name", type: "string" as const },
+      { name: "Street type", type: "string" as const },
+      { name: "Suburb", type: "string" as const },
+      { name: "State", type: "string" as const },
+      { name: "Post Code", type: "string" as const },
 
-    { name: "Bathrooms", type: "number" as const },
-    { name: "Bedrooms", type: "number" as const },
-    { name: "Parking Spaces", type: "number" as const }, // Car Spaces
-    { name: "Car ports", type: "number" as const },
-    { name: "Garages", type: "number" as const },
-    { name: "Dining Rooms", type: "number" as const },
-    { name: "Open Spaces", type: "number" as const },
+      { name: "Bathrooms", type: "number" as const },
+      { name: "Bedrooms", type: "number" as const },
+      { name: "Parking Spaces", type: "number" as const }, // Car Spaces
+      { name: "Car ports", type: "number" as const },
+      { name: "Garages", type: "number" as const },
+      { name: "Dining Rooms", type: "number" as const },
+      { name: "Open Spaces", type: "number" as const },
 
-    { name: "Listing Type", type: "string" as const },
-    { name: "Listing status", type: "string" as const },
-    { name: "Building Area", type: "number" as const },
+      { name: "Listing Type", type: "string" as const },
+      { name: "Listing status", type: "string" as const },
+      { name: "Building Area", type: "number" as const },
     { name: "Lot Size", type: "number" as const }, // Land area
     
     { name: "Listing price", type: "string" as const },
@@ -194,7 +194,7 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
     const buildingArea = project.value.measurements?.find(
       (m) => m.code === "BAS"
     )?.value;
-
+    
     const landArea = project.value.measurements?.find(
       (m) => m.code === "LAS"
     )?.value;
@@ -235,7 +235,7 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
 
     return {
       cells: [
-         { type: "number" as const, value: project.value.id },
+         { type: "number" as const, value: project.value.id != 0 ? project.value.id : 0},
         {
           type: "media" as const,
           value: [
@@ -299,20 +299,18 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
         { type: "string" as const, value: project.value.address.state },
         { type: "string" as const, value: project.value.address.postCode },
 
-        { type: "number" as const, value: project.value.bathrooms },
-        { type: "number" as const, value: project.value.bedrooms },
-        { type: "number" as const, value: project.value.carSpaces },
-        { type: "number" as const, value: project.value.carPorts },
-        { type: "number" as const, value: project.value.garages },
-        { type: "number" as const, value: project.value.diningRooms },
-        { type: "number" as const, value: project.value.openSpaces },
+        { type: "number" as const, value: project.value.bathrooms != 0 ? project.value.bathrooms : 0},
+        { type: "number" as const, value: project.value.bedrooms != 0 ? project.value.bedrooms : 0},
+        { type: "number" as const, value: project.value.carSpaces != 0 ? project.value.carSpaces : 0},
+        { type: "number" as const, value: project.value.carports != 0 ? project.value.carports : 0},
+        { type: "number" as const, value: project.value.garages != 0 ? project.value.garages : 0},
+        { type: "number" as const, value: project.value.diningRooms != 0 ? project.value.diningRooms : 0},
+        { type: "number" as const, value: project.value.openSpaces != 0 ? project.value.openSpaces : 0},
 
-        { type: "string" as const, value: project.value.status },
-        
-        { type: "string" as const, value: project.value.auction != null||undefined  ? "Auction" : project.value.subType ?? "" },
-
-        { type: "number" as const, value: buildingArea ?? "" },
-        { type: "number" as const, value: landArea ?? "" },
+        { type: "string" as const, value: project.value.status }, // Listing Type        
+        { type: "string" as const, value: project.value.auction != null||undefined  ? "Auction" : project.value.subType ?? "" }, // Listing Status
+        { type: "number" as const, value: buildingArea != 0 ? buildingArea : 0 },
+        { type: "number" as const, value: landArea != 0 ? landArea : 0 },
 
         { type: "string" as const, value: project.value.price },
         { type: "string" as const, value: propertyWebsite.url ?? "" },
