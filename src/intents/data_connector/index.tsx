@@ -68,4 +68,4 @@ const dataConnector: DataConnectorIntent = {
 };
 prepareDataConnector(dataConnector);
 
-export default dataConnector
+export default dataConnector;

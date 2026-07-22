@@ -1,171 +1,164 @@
 // For usage information, see the README.md file.
 
-import type {
-  DataTable,
-  DataTableImageUpload,
-  DataTableVideoUpload,
-  GetDataTableRequest,
-} from "@canva/intents/data";
+import type { DataTable, GetDataTableRequest } from "@canva/intents/data";
+import type { ImageMimeType } from "@canva/asset";
 
-// Available filter options for real estate project sales stages
-export const saleStageOptions: string[] = ["3290153", "3387673", "3417514"];
+const LISTINGS_API_URL =
+  "https://raywhiteapi.ep.dynamics.net/v1/listings?apiKey=df83a96e-0f55-4a20-82d9-eaa5f3e30335";
+
+// Listing IDs used when the saved config doesn't specify a selection.
+export const defaultListingIds: string[] = ["3290153", "3387673", "3417514"];
 
 // Configuration object that defines the structure of a data source query
 export type RealEstateDataConfig = {
   listingIds?: string[];
 };
 
-// Fetches data from the mock API and transforms it into Canva's DataTable format
+// Fetches data from the API and transforms it into Canva's DataTable format
 export const getRealEstateData = async (
-  request: GetDataTableRequest
+  request: GetDataTableRequest,
 ): Promise<DataTable> => {
-  const { dataSourceRef, limit } = request;
+  const { dataSourceRef } = request;
 
   if (!dataSourceRef) {
     throw new Error("Missing dataSourceRef");
   }
 
-  // Parse saved config
-  const dataRef = JSON.parse(dataSourceRef.source) as RealEstateDataConfig;
-  console.log(dataRef);
+  const config = JSON.parse(dataSourceRef.source) as RealEstateDataConfig;
 
-  // Use selected stages or default
-  const selectedlistingIds = dataRef.listingIds?.length
-    ? dataRef.listingIds
-    : saleStageOptions;
+  const selectedListingIds = config.listingIds?.length
+    ? config.listingIds
+    : defaultListingIds;
 
-  const projects = await getListings(selectedlistingIds);
+  const listings = await getListings(selectedListingIds);
 
-  // If you plan to filter by stage, you'd do it here:
-  // const filteredProjects = projects.filter(p => selectedStages.includes(p.stage));
-
-  const datalocalTable = transformToDataTable(projects);
-
-  // datalocalTable.rows = datalocalTable.rows.slice(0, limit.row);
-
-  return datalocalTable; // ✅ just return
+  return transformToDataTable(listings);
 };
 
-// Structure representing a real estate project from the mock API
-// interface RealEstateProject {
-//   Address: string;
-//   bed: number;
-//   bath: number;
-//   carSpace: number;
-//   media: (DataTableImageUpload | DataTableVideoUpload)[];
-// }
-
-/**
- * Sample data for real estate projects.
- * Each project has a name, sales stage values, and media assets.
- */
-
-const getListings = async (selectedlistingIds) => {
-  const bodyData = {
-    id: selectedlistingIds,
-  };
-
-  const response = await fetch(
-    "https://raywhiteapi.ep.dynamics.net/v1/listings?apiKey=df83a96e-0f55-4a20-82d9-eaa5f3e30335",
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(bodyData),
-    }
-  );
+const getListings = async (ids: string[]) => {
+  const response = await fetch(LISTINGS_API_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ id: ids }),
+  });
 
   const result = await response.json();
   return result.data;
 };
 
-const getProjects = () => [
-  {
-    Address: "88 Duporth Avenue",
-    bed: 3,
-    bath: 3,
-    carSpace: 3,
-    // media: staticMediaData,
-    media:
-      "https://cdn6.ep.dynamics.net/s3/rw-propertyimages/d85e-H3417514-1764571080-2-1719641016-c15a119d-5086-493e-a22b-6ac04857a0a4401-88-Duporth-Ave-Dusk-7933.w.1920.zc.C.q.70.jpg?height=1096&maxheight=2841&maxwidth=2841&quality=90&scale=down&width=1644&format=webp",
-  },
-  {
-    Address: "95 Pacific Road",
-    bed: 5,
-    bath: 4,
-    carSpace: 2,
-    media:
-      "https://cdn6.ep.dynamics.net/s3/rw-propertyimages/638a-H3290153-145414728__1745817747-87205-Drone2a.jpg?height=1480&maxheight=2841&maxwidth=2841&quality=90&scale=down&width=1973&format=webp",
-  },
-  {
-    Address: "19A Coolong Road",
-    bed: 5,
-    bath: 6,
-    carSpace: 3,
-    media:
-      "https://cdn6.ep.dynamics.net/s3/rw-propertyimages/3854-H3417514-1764571080-1-1719113662-31ac4c21-4fc0-4060-8234-4b70ae90f03f401-88-Duporth-day-new-453.w.1920.zc.C.q.70.jpg?height=1096&maxheight=2841&maxwidth=2841&quality=90&scale=down&width=1644&format=webp",
-  },
-];
+// Maps a file format/extension to a Canva-supported image MIME type.
+// Checks the `format` query param first (CDN output format), then the file
+// extension, and falls back to image/jpeg.
+const getImageMimeType = (url: string): ImageMimeType => {
+  const mimeByExt: Record<string, ImageMimeType> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    heic: "image/heic",
+    svg: "image/svg+xml",
+  };
 
-// Converts the mock API project data into Canva's DataTable format with dynamic column configuration
-const transformToDataTable = async (projects): Promise<DataTable> => {
-  console.log(projects);
+  // 1. Prefer the CDN's requested output format, e.g. ...&format=webp
+  const formatParam = url.match(/[?&]format=([^&]+)/i)?.[1]?.toLowerCase();
+  if (formatParam && mimeByExt[formatParam]) {
+    return mimeByExt[formatParam];
+  }
 
-  const agentIds = projects.flatMap(
-    (p) => p.value.agents?.map((a) => a.memberId) || []
-  );
-  const uniqueAgentIds = [...new Set(agentIds)];
-  const bodyData = { id: uniqueAgentIds };
+  // 2. Fall back to the file extension in the path (ignoring the query string)
+  const path = url.split("?")[0] ?? "";
+  const ext = path.split(".").pop()?.toLowerCase();
+  if (ext && mimeByExt[ext]) {
+    return mimeByExt[ext];
+  }
 
-  const response = await fetch(
-    "https://raywhiteapi.ep.dynamics.net/v1/members?apiKey=df83a96e-0f55-4a20-82d9-eaa5f3e30335",
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(bodyData),
-    }
-  );
+  // 3. Default
+  return "image/jpeg";
+};
 
-  const agentData = await response.json();
-  console.log(agentData.data);
+const stripHtml = (html?: string): string => {
+  if (!html) return "";
+  return html
+    .replace(/<\s*br\s*\/?\s*>/gi, "\n") // <br>, <br/>, <br /> -> newline
+    .replace(/<\/\s*(p|div|li|h[1-6])\s*>/gi, "\n") // close of block tags -> newline
+    .replace(/<[^>]+>/g, "") // strip all remaining tags
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0?39;|&apos;/gi, "'")
+    .replace(/[ \t]+\n/g, "\n") // trim trailing spaces before newlines
+    .replace(/\n{3,}/g, "\n\n") // collapse 3+ newlines to a blank line
+    .trim();
+};
 
-  // Define column structure based on user's selected stages
+// Appends query params to a URL, choosing `?` or `&` as appropriate.
+const appendParams = (url: string, params: string): string => {
+  if (!url) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}${params}`;
+};
+
+const buildImageUpload = (image: {
+  url: string;
+  width?: number;
+  height?: number;
+}) => {
+  return {
+    type: "image_upload" as const,
+    url: appendParams(image.url, "purpose=import"),
+    thumbnailUrl: appendParams(image.url, "width=400&purpose=thumb"),
+    width: image.width ?? 800,
+    height: image.height ?? 800,
+    mimeType: getImageMimeType(image.url),
+    aiDisclosure: "none" as const,
+  };
+};
+
+// Formats a 10-digit AU mobile as "0400 000 000"; other values pass through unchanged.
+const formatPhoneNumber = (contact?: string): string => {
+  if (!contact) return "";
+  if (!/^\d{10}$/.test(contact)) return contact;
+  return contact.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3");
+};
+
+// Converts the API listing data into Canva's DataTable format.
+const transformToDataTable = (listings: any[]): DataTable => {
+  // Define column structure
   const columnConfigs = [
     { name: "Listing id", type: "number" as const },
     { name: "Image", type: "media" as const },
     { name: "Other image", type: "media" as const },
     { name: "Other image 2", type: "media" as const },
 
-      { name: "Address", type: "string" as const },
-      { name: "Address 2", type: "string" as const },
-      { name: "Address 3", type: "string" as const },
-      { name: "Title", type: "string" as const },
-      { name: "Description", type: "string" as const },
+    { name: "Address", type: "string" as const },
+    { name: "Address 2", type: "string" as const },
+    { name: "Address 3", type: "string" as const },
+    { name: "Title", type: "string" as const },
+    { name: "Description", type: "string" as const },
 
-      { name: "Unit Number", type: "string" as const },
-      { name: "Street Number", type: "string" as const },
-      { name: "Street name", type: "string" as const },
-      { name: "Street type", type: "string" as const },
-      { name: "Suburb", type: "string" as const },
-      { name: "State", type: "string" as const },
-      { name: "Post Code", type: "string" as const },
+    { name: "Unit Number", type: "string" as const },
+    { name: "Street Number", type: "string" as const },
+    { name: "Street name", type: "string" as const },
+    { name: "Street type", type: "string" as const },
+    { name: "Suburb", type: "string" as const },
+    { name: "State", type: "string" as const },
+    { name: "Post Code", type: "string" as const },
 
-      { name: "Bathrooms", type: "number" as const },
-      { name: "Bedrooms", type: "number" as const },
-      { name: "Parking Spaces", type: "number" as const }, // Car Spaces
-      { name: "Car ports", type: "number" as const },
-      { name: "Garages", type: "number" as const },
-      { name: "Dining Rooms", type: "number" as const },
-      { name: "Open Spaces", type: "number" as const },
+    { name: "Bathrooms", type: "number" as const },
+    { name: "Bedrooms", type: "number" as const },
+    { name: "Parking Spaces", type: "number" as const }, // Car Spaces
+    { name: "Car ports", type: "number" as const },
+    { name: "Garages", type: "number" as const },
+    { name: "Dining Rooms", type: "number" as const },
+    { name: "Open Spaces", type: "number" as const },
 
-      { name: "Listing Type", type: "string" as const },
-      { name: "Listing status", type: "string" as const },
-      { name: "Building Area", type: "number" as const },
+    { name: "Listing Type", type: "string" as const },
+    { name: "Listing status", type: "string" as const },
+    { name: "Building Area", type: "number" as const },
     { name: "Lot Size", type: "number" as const }, // Land area
-    
+
     { name: "Listing price", type: "string" as const },
     { name: "Property Website", type: "string" as const },
 
@@ -181,412 +174,117 @@ const transformToDataTable = async (projects): Promise<DataTable> => {
     { name: "Agent Email 3", type: "string" as const },
     { name: "Agent Contact 3", type: "string" as const },
     { name: "Office name", type: "string" as const },
-
   ];
 
   // Generate table rows with data cells matching the column structure
-  const rows = projects.map((project) => {
-
-    const address2 = project.value.address.unitNumber ? project.value.address.unitNumber + '/' + project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType
-    :
-    project.value.address.streetNumber + ' ' + project.value.address.streetName + ' ' + project.value.address.streetType
+  const rows = listings.map((project) => {
+    const { unitNumber, streetNumber, streetName, streetType } =
+      project.value.address;
+    const streetAddress = `${streetNumber} ${streetName} ${streetType}`;
+    const address2 = unitNumber
+      ? `${unitNumber}/${streetAddress}`
+      : streetAddress;
 
     const buildingArea = project.value.measurements?.find(
-      (m) => m.code === "BAS"
+      (m) => m.code === "BAS",
     )?.value;
-    
+
     const landArea = project.value.measurements?.find(
-      (m) => m.code === "LAS"
+      (m) => m.code === "LAS",
     )?.value;
 
-    const propertyWebsite = project.value.links?.find(
-      (m) => m.code === "PRL"
-    )
+    const propertyWebsite = project.value.links?.find((m) => m.code === "PRL");
 
-    const agents = project.value.agents || [];
-    const [agent1, agent2, agent3] = agents;
+    const [agent1, agent2, agent3] = project.value.agents ?? [];
 
-    function formatNumber(contact: string){
-      if (!/^\d{10}$/.test(contact)) return contact;
-      return contact.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
-    }
+    const images = project.value.images ?? [];
 
-    
-    // if (project.value.auction.date != null){      
-    //  const auctionDate =  new Date(project.value.auction.date)
-    //  console.log(project.value.auction.date)
-// }
-    
-
-    // const agentMap = new Map(agentData.data.map((a) => [a.value.id, a]));
-
-    // const agent1Info = agent1 ? agentMap.get(agent1.memberId) : null;
-    // const agent2Info = agent2 ? agentMap.get(agent2.memberId) : null;
-
-    // console.log(agentData);
-
-
-    // const agent1photo =
-    //   agent1Info.value.profile.photos?.find((m) => m.typeCode === "MPHS")
-    //     ?.fileName ?? null;
-    // const agent2photo =
-    //   agent2Info.value.profile.photos?.find((m) => m.typeCode === "MPHS")
-    //     ?.fileName ?? null;
+    const auction = project.value.auction;
 
     return {
       cells: [
-         { type: "number" as const, value: project.value.id != 0 ? project.value.id : 0},
+        { type: "number" as const, value: project.value.id ?? 0 },
         {
           type: "media" as const,
-          value: [
-            {
-              type: "image_upload",
-              url: project.value.images[0].url,
-              thumbnailUrl: project.value.images[0].url,
-              width: 800,
-              height: 800,
-              mimeType: "image/jpeg",
-              aiDisclosure: "none",
-            },
-          ],
+          value: images.length >= 1 ? [buildImageUpload(images[0])] : [],
         },
-        project.value.images.length >= 2 ?
         {
           type: "media" as const,
-          value: [
-            {
-              type: "image_upload",
-              url: project.value.images[1].url,
-              thumbnailUrl: project.value.images[1].url,
-              width: 800,
-              height: 800,
-              mimeType: "image/jpeg",
-              aiDisclosure: "none",
-            },
-          ],
-        }
-        :
-        {},
-        project.value.images.length >= 3 ?
+          value: images.length >= 2 ? [buildImageUpload(images[1])] : [],
+        },
         {
           type: "media" as const,
-          value: [
-            {
-              type: "image_upload",
-              url: project.value.images[2].url,
-              thumbnailUrl: project.value.images[2].url,
-              width: 800,
-              height: 800,
-              mimeType: "image/jpeg",
-              aiDisclosure: "none",
-            },
-          ],
-        }
-        : 
-        {},
-        
+          value: images.length >= 3 ? [buildImageUpload(images[2])] : [],
+        },
+
         { type: "string" as const, value: project.value.address.formatted },
         { type: "string" as const, value: address2 },
-        { type: "string" as const, value: project.value.address.suburb + ', ' + project.value.address.postCode },
+        {
+          type: "string" as const,
+          value: `${project.value.address.suburb}, ${project.value.address.postCode}`,
+        },
         { type: "string" as const, value: project.value.title },
-        { type: "string" as const, value: project.value.description },
+        { type: "string" as const, value: stripHtml(project.value.description) },
 
-        { type: "string" as const, value: project.value.address.unitNumber },
-        { type: "string" as const, value: project.value.address.streetNumber },
-        { type: "string" as const, value: project.value.address.streetName },
-        { type: "string" as const, value: project.value.address.streetType },
+        { type: "string" as const, value: unitNumber },
+        { type: "string" as const, value: streetNumber },
+        { type: "string" as const, value: streetName },
+        { type: "string" as const, value: streetType },
         { type: "string" as const, value: project.value.address.suburb },
         { type: "string" as const, value: project.value.address.state },
         { type: "string" as const, value: project.value.address.postCode },
 
-        { type: "number" as const, value: project.value.bathrooms != 0 ? project.value.bathrooms : 0},
-        { type: "number" as const, value: project.value.bedrooms != 0 ? project.value.bedrooms : 0},
-        { type: "number" as const, value: project.value.carSpaces != 0 ? project.value.carSpaces : 0},
-        { type: "number" as const, value: project.value.carports != 0 ? project.value.carports : 0},
-        { type: "number" as const, value: project.value.garages != 0 ? project.value.garages : 0},
-        { type: "number" as const, value: project.value.diningRooms != 0 ? project.value.diningRooms : 0},
-        { type: "number" as const, value: project.value.openSpaces != 0 ? project.value.openSpaces : 0},
+        { type: "number" as const, value: project.value.bathrooms ?? 0 },
+        { type: "number" as const, value: project.value.bedrooms ?? 0 },
+        { type: "number" as const, value: project.value.carSpaces ?? 0 },
+        { type: "number" as const, value: project.value.carports ?? 0 },
+        { type: "number" as const, value: project.value.garages ?? 0 },
+        { type: "number" as const, value: project.value.diningRooms ?? 0 },
+        { type: "number" as const, value: project.value.openSpaces ?? 0 },
 
-        { type: "string" as const, value: project.value.status }, // Listing Type        
-        { type: "string" as const, value: project.value.auction != null||undefined  ? "Auction" : project.value.subType ?? "" }, // Listing Status
-        { type: "number" as const, value: buildingArea != 0 ? buildingArea : 0 },
-        { type: "number" as const, value: landArea != 0 ? landArea : 0 },
+        { type: "string" as const, value: project.value.status }, // Listing Type
+        {
+          type: "string" as const,
+          value: auction ? "Auction" : (project.value.subType ?? ""), // Listing Status
+        },
+        { type: "number" as const, value: buildingArea ?? 0 },
+        { type: "number" as const, value: landArea ?? 0 },
 
         { type: "string" as const, value: project.value.price },
-        { type: "string" as const, value: propertyWebsite.url ?? "" },
+        { type: "string" as const, value: propertyWebsite?.url ?? "" },
 
-        { type: "string" as const, value: project.value.auction != null||undefined ? new Date(project.value.auction.date).toLocaleDateString("en-AU", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric"
-        }): ""},
-        { type: "string" as const, value: project.value.auction != null||undefined ? project.value.auction.location : ""},
+        {
+          type: "string" as const,
+          value: auction
+            ? new Date(auction.date).toLocaleDateString("en-AU", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            : "",
+        },
+        { type: "string" as const, value: auction?.location ?? "" },
 
-        // {
-        //   type: "media" as const,
-        //   value: agent1photo ? [
-        //     {
-        //       type: "image_upload",
-        //       url: agent1photo,
-        //       thumbnailUrl: agent1photo,
-        //       width: 800,
-        //       height: 800,
-        //       mimeType: "image/jpeg",
-        //       aiDisclosure: "none",
-        //     },
-        //   ] : [],
-        // },
-        { type: "string" as const, value: agent1.fullName},
-        { type: "string" as const, value: agent1.email},
-        { type: "string" as const, value: formatNumber(agent1.mobilePhone) },
+        { type: "string" as const, value: agent1?.fullName ?? "" },
+        { type: "string" as const, value: agent1?.email ?? "" },
+        { type: "string" as const, value: formatPhoneNumber(agent1?.mobilePhone) },
 
-        // {
-        //   type: "media" as const,
-        //   value: agent2photo ? [
-        //     {
-        //       type: "image_upload",
-        //       url: agent2photo,
-        //       thumbnailUrl: agent2photo,
-        //       width: 800,
-        //       height: 800,
-        //       mimeType: "image/jpeg",
-        //       aiDisclosure: "none",
-        //     },
-        //   ] : [],
-        // },
-          { type: "string" as const, value: agent2?.fullName ?? "" },
-          { type: "string" as const, value: agent2?.email ?? "" },
-          { type: "string" as const, value: formatNumber(agent2?.mobilePhone) ?? "" },
-        
+        { type: "string" as const, value: agent2?.fullName ?? "" },
+        { type: "string" as const, value: agent2?.email ?? "" },
+        { type: "string" as const, value: formatPhoneNumber(agent2?.mobilePhone) },
+
         { type: "string" as const, value: agent3?.fullName ?? "" },
         { type: "string" as const, value: agent3?.email ?? "" },
-        { type: "string" as const, value: formatNumber(agent3?.mobilePhone) ?? "" },
+        { type: "string" as const, value: formatPhoneNumber(agent3?.mobilePhone) },
 
-        { type: "string" as const, value: project.value.office.businessName },
+        {
+          type: "string" as const,
+          value: project.value.office?.businessName ?? "",
+        },
       ],
     };
   });
 
   return { columnConfigs, rows };
 };
-
-type Measurement = {
-  code: string;
-  value: number | null;
-};
-
-type Agent = {
-  memberId: string;
-  fullName?: string;
-  email?: string;
-  mobilePhone?: string;
-};
-
-type ProjectValue = {
-  title: string;
-  description?: string;
-  address: {
-    formatted?: string;
-    unitNumber?: string;
-    streetNumber?: string;
-    streetName?: string;
-    streetType?: string;
-    suburb?: string;
-    state?: string;
-    postCode?: string;
-  };
-  images?: { url: string }[];
-  bathrooms?: number;
-  bedrooms?: number;
-  carSpaces?: number;
-  carPorts?: number;
-  garages?: number;
-  diningRooms?: number;
-  openSpaces?: number;
-  statusCode?: string;
-  measurements?: Measurement[];
-  agents?: Agent[];
-};
-
-type Project = {
-  value: ProjectValue;
-};
-
-type AgentApiResponse = {
-  data: Array<{
-    value: {
-      id: string;
-      profile: {
-        photos?: { typeCode: string; fileName: string }[];
-      };
-    };
-  }>;
-};
-
-type DataCell = { type: "string" | "number" | "media"; value: any };
-type DataRow = { cells: DataCell[] };
-type ColumnConfig = { name: string; type: "string" | "number" | "media" };
-
-type DataTable = {
-  columnConfigs: ColumnConfig[];
-  rows: DataRow[];
-};
-
-// const transformToDataTable = async (projects: Project[]): Promise<DataTable> => {
-//   // 1️⃣ Extract unique agent IDs
-//   const agentIds = projects.flatMap(
-//     (p) => (p.value.agents ?? []).map((a) => a.memberId)
-//   );
-//   const uniqueAgentIds = [...new Set(agentIds)];
-
-//   // 2️⃣ Fetch agent data
-//   const response = await fetch(
-//     "https://raywhiteapi.ep.dynamics.net/v1/members?apiKey=df83a96e-0f55-4a20-82d9-eaa5f3e30335",
-//     {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ id: uniqueAgentIds }),
-//     }
-//   );
-
-//   if (!response.ok) throw new Error(`Failed to fetch agents: ${response.status}`);
-//   const agentData: AgentApiResponse = await response.json();
-
-//   // 3️⃣ Build agent lookup map
-//   const agentMap = new Map(agentData.data.map((a) => [a.value.id, a.value]));
-
-//   // 4️⃣ Define table columns
-//   const columnConfigs: ColumnConfig[] = [
-//     { name: "Image", type: "media" },
-//     { name: "Address", type: "string" },
-//     { name: "Title", type: "string" },
-//     { name: "Description", type: "string" },
-//     { name: "Unit Number", type: "string" },
-//     { name: "Street Number", type: "string" },
-//     { name: "Street name", type: "string" },
-//     { name: "Street type", type: "string" },
-//     { name: "Suburb", type: "string" },
-//     { name: "State", type: "string" },
-//     { name: "Post Code", type: "string" },
-//     { name: "Bathrooms", type: "number" },
-//     { name: "Bedrooms", type: "number" },
-//     { name: "Car Spaces", type: "number" },
-//     { name: "Garages", type: "number" },
-//     { name: "Dining Rooms", type: "number" },
-//     { name: "Open Spaces", type: "number" },
-//     { name: "Listing Type", type: "string" },
-//     { name: "Building Area", type: "number" },
-//     { name: "Land Area", type: "number" },
-//     { name: "Agent Photo", type: "media" },
-//     { name: "Agent Name", type: "string" },
-//     { name: "Agent Email", type: "string" },
-//     { name: "Agent Contact", type: "string" },
-//   ];
-
-//   // 5️⃣ Generate rows
-//   const rows: DataRow[] = projects.map((project) => {
-//     const p = project.value;
-
-//     const buildingArea = p.measurements?.find((m) => m.code === "BAS")?.value ?? null;
-//     const landArea = p.measurements?.find((m) => m.code === "LAS")?.value ?? null;
-
-//     // Pick first agent if available
-//     const agent = p.agents?.[0];
-//     const agentInfo = agent ? agentMap.get(agent.memberId) : undefined;
-//     const agentPhoto = agentInfo?.profile.photos?.find((ph) => ph.typeCode === "MPHS")?.fileName ?? "";
-
-//     return {
-//       cells: [
-//         {
-//           type: "media",
-//           value: p.images?.[0]
-//             ? [
-//                 {
-//                   type: "image_upload",
-//                   url: p.images[0].url,
-//                   thumbnailUrl: p.images[0].url,
-//                   width: 800,
-//                   height: 800,
-//                   mimeType: "image/jpeg",
-//                   aiDisclosure: "none",
-//                 },
-//               ]
-//             : [],
-//         },
-//         { type: "string", value: p.address.formatted ?? "" },
-//         { type: "string", value: p.title ?? "" },
-//         { type: "string", value: p.description ?? "" },
-//         { type: "string", value: p.address.unitNumber ?? "" },
-//         { type: "string", value: p.address.streetNumber ?? "" },
-//         { type: "string", value: p.address.streetName ?? "" },
-//         { type: "string", value: p.address.streetType ?? "" },
-//         { type: "string", value: p.address.suburb ?? "" },
-//         { type: "string", value: p.address.state ?? "" },
-//         { type: "string", value: p.address.postCode ?? "" },
-//         { type: "number", value: p.bathrooms ?? null },
-//         { type: "number", value: p.bedrooms ?? null },
-//         { type: "number", value: p.carSpaces ?? null },
-//         { type: "number", value: p.garages ?? null },
-//         { type: "number", value: p.diningRooms ?? null },
-//         { type: "number", value: p.openSpaces ?? null },
-//         { type: "string", value: p.statusCode ?? "" },
-//         { type: "number", value: buildingArea },
-//         { type: "number", value: landArea },
-//         {
-//           type: "media",
-//           value: agentPhoto
-//             ? [
-//                 {
-//                   type: "image_upload",
-//                   url: agentPhoto,
-//                   thumbnailUrl: agentPhoto,
-//                   width: 800,
-//                   height: 800,
-//                   mimeType: "image/jpeg",
-//                   aiDisclosure: "none",
-//                 },
-//               ]
-//             : [],
-//         },
-//         { type: "string", value: agent?.fullName ?? "" },
-//         { type: "string", value: agent?.email ?? "" },
-//         { type: "string", value: agent?.mobilePhone ?? "" },
-//       ],
-//     };
-//   });
-//   return { columnConfigs, rows };
-// };
-
-// Static media assets used for demonstration purposes in all projects
-const staticMediaData: (DataTableImageUpload | DataTableVideoUpload)[] = [
-  {
-    type: "video_upload",
-    mimeType: "video/mp4",
-    url: "https://www.canva.dev/example-assets/video-import/video.mp4",
-    thumbnailImageUrl:
-      "https://www.canva.dev/example-assets/video-import/thumbnail-image.jpg",
-    thumbnailVideoUrl:
-      "https://www.canva.dev/example-assets/video-import/thumbnail-video.mp4",
-    width: 405,
-    height: 720,
-    aiDisclosure: "none",
-  },
-  {
-    type: "image_upload",
-    mimeType: "image/jpeg",
-    url: "https://www.canva.dev/example-assets/image-import/image.jpg",
-    thumbnailUrl:
-      "https://www.canva.dev/example-assets/image-import/thumbnail.jpg",
-    width: 540,
-    height: 720,
-    aiDisclosure: "none",
-  },
-];
-
-// Generates random sales values for demonstration purposes
-// function getRandomSalesValue(): number {
-//   const min = 10;
-//   const max = 100;
-//   return Math.floor(Math.random() * (max - min + 1)) + min;
-// }

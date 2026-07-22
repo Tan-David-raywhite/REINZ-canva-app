@@ -18,7 +18,7 @@ import {
 } from "@canva/app-ui-kit";
 import { useEffect, useState } from "react";
 import * as styles from "styles/components.css";
-import { saleStageOptions, type RealEstateDataConfig } from "./data";
+import { type RealEstateDataConfig } from "./data";
 
 export const SelectionUI = (request: RenderSelectionUiRequest) => {
   const [listingIds, setListingIds] = useState<string[]>();
@@ -38,7 +38,7 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
         if (request.invocationContext.dataSourceRef) {
           try {
             const savedParams = JSON.parse(
-              request.invocationContext.dataSourceRef.source
+              request.invocationContext.dataSourceRef.source,
             ) as RealEstateDataConfig;
             setListingIds(savedParams.listingIds || []);
           } catch {
@@ -49,14 +49,14 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
       case "outdated_source_ref":
         // The data source reference stored in Canva is no longer valid
         setError(
-          "Your previously selected data is no longer available. Please make a new selection."
+          "Your previously selected data is no longer available. Please make a new selection.",
         );
         break;
       case "app_error":
         // Display error message from previous data fetch attempt
         setError(
           request.invocationContext.message ||
-            "An error occurred with your data"
+            "An error occurred with your data",
         );
         break;
       default:
@@ -84,7 +84,7 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
         setError(
           result.status === "app_error" && "message" in result
             ? result.message || "An error occurred"
-            : `Error: ${result.status}`
+            : `Error: ${result.status}`,
         );
       }
     } catch {
@@ -110,7 +110,7 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
           "content-type": "application/json",
         },
         body: JSON.stringify(bodyData),
-      }
+      },
     );
 
     const result = await response.json();
@@ -121,10 +121,9 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
     <div className={styles.scrollContainer}>
       <Rows spacing="2u">
         <Title size="large">Listings api (Data Connector)</Title>
-        
+
         {/* <Tabs> */}
         <Rows spacing="1u">
-
           {/* <TabList>
             <Tab id="search">
               Search listings
@@ -138,10 +137,10 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
           <TabPanel id="search"> */}
         <Rows spacing="1u">
           <SearchInputMenu onChangeComplete={(val) => getListings(val)} />
-        {error && <Alert tone="critical" title={error} />}
-        {success && (
-          <Alert tone="positive" title="Data preview loaded successfully!" />
-        )}
+          {error && <Alert tone="critical" title={error} />}
+          {success && (
+            <Alert tone="positive" title="Data preview loaded successfully!" />
+          )}
           {searchListings ? (
             <FormField
               label="Release Stage"
@@ -165,13 +164,13 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
             onClick={loadData}
             loading={loading}
             stretch
-            disabled={listingIds ? false: true}
-          > 
+            disabled={listingIds ? false : true}
+          >
             Load data
           </Button>
         </Rows>
         {/* </TabPanel> */}
-          {/* <TabPanel id="selected">
+        {/* <TabPanel id="selected">
         <Rows spacing="1u">
           {
             listingIds ? (
@@ -219,7 +218,6 @@ export const SelectionUI = (request: RenderSelectionUiRequest) => {
         {/* </TabPanels>
         </Tabs> */}
       </Rows>
-      
     </div>
   );
 };
